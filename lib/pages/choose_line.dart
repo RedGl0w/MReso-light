@@ -44,7 +44,7 @@ class _ChooseLineState extends State<ChooseLine> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Line>>(
+    return FutureBuilder(
         future: Line.fetchLines(),
         builder: (BuildContext context, AsyncSnapshot<List<Line>> snapshot) {
           Widget body;

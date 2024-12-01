@@ -98,9 +98,9 @@ class Times {
     );
   }
 
-  static Future<Map<String, List<Times>>> fetchTime(String lineId, String ClusterId) async {
+  static Future<Map<String, List<Times>>> fetchTime(String lineId, String ClusterCode) async {
     final response = await http.get(
-        Uri.parse('$urlBase/routers/default/index/clusters/$ClusterId/stoptimes?route=$lineId'),
+        Uri.parse('$urlBase/routers/default/index/clusters/$ClusterCode/stoptimes?route=$lineId'),
         headers: {
           "origin": "MReso_light"
         }

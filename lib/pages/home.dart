@@ -13,12 +13,34 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
 
-  Widget generateCard(SharedPreferences prefs, List<String> lines, int index) {
+  Widget generateCard(SharedPreferences prefs, String s) {
+    String lineId = s.split(',')[0];
+    String clusterCode = s.split(',')[1];
     return FutureBuilder(
-        future: Times.fetchTime(lines[index], lines[index+1]),
+        future: Times.fetchTime(lineId, clusterCode),
         builder: (BuildContext context, AsyncSnapshot<Map<String, List<Times>>> snapshot) {
           Widget subTitle;
-          String title = "Ligne ${lines[index*2]} : ${lines[index*2+1]}"; // Should be changed when data loaded
+
+          List<String> lineDetails = prefs.getString(lineId)!.split(",");
+          Color bg = Color(int.parse(lineDetails[0]));
+          Color fg = Color(int.parse(lineDetails[1]));
+          String shortName = lineDetails[2];
+          String clusterName = prefs.getString(clusterCode)!;
+
+          Widget title = Row(children: [
+            ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: bg,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15),),
+              ),
+              child: Text(
+                shortName,
+                style: TextStyle(color: fg),
+              ),),
+            const SizedBox(width: 10),
+            Text(clusterName)
+          ]);
           if (snapshot.hasData) {
             String out = "";
             snapshot.data!.keys.forEach((destination) {
@@ -37,10 +59,10 @@ class _HomePageState extends State<HomePage> {
           }
           return Card(
               child: ListTile(
-                title: Text(title),
+                title: title,
                 trailing: IconButton(
                     onPressed: () {
-                      Storage.removeFromCluster(prefs, index);
+                      Storage.removeFromCluster(prefs, s);
                       setState(() {});
                     },
                     icon: Icon(Icons.delete)
@@ -58,16 +80,15 @@ class _HomePageState extends State<HomePage> {
         future: SharedPreferences.getInstance(),
         builder: (BuildContext context, AsyncSnapshot<SharedPreferences> snapshot) {
           Widget body;
-
           if (snapshot.hasData) {
             final SharedPreferences prefs = snapshot.data!;
             List<String>? lines = prefs.getStringList(Storage.key);
-            if(lines != null) {
+            if(lines != null && lines!.length != 0) {
               body = Center(
                   child: ListView.builder(
-                      itemCount: (lines.length/2).round(),
+                      itemCount: lines!.length,
                       itemBuilder: (context, index) {
-                        return generateCard(prefs, lines, index);
+                        return generateCard(prefs, lines[index]);
                       })
               );
             } else {

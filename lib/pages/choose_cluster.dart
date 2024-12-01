@@ -26,15 +26,17 @@ class _ChooseCluster extends State<ChooseCluster> {
           if(snapshot.hasData) {
             List<Cluster> data = snapshot.data![0]!;
             final SharedPreferences prefs = snapshot.data![1];
+            Line l = widget.selectionnedLine;
+            Storage.addLine(prefs, l.id, l.shortName, l.bg, l.fg);
             body = ListView.builder(
                 itemCount: data.length,
                 itemBuilder: (context, index) {
                   return GestureDetector(
                     onTap: () {
-                      print("${data[index].id}");
                       Navigator.pop(context);
                       Navigator.pop(context);
                       Storage.addCluster(prefs, widget.selectionnedLine.id, data[index].code);
+                      prefs.setString(data[index].code, data[index].name);
                     },
                     child: Card(
                         child: ListTile(
