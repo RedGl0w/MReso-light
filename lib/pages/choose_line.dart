@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mreso_light/api.dart';
+import 'choose_cluster.dart';
 
 class ChooseLine extends StatefulWidget {
   const ChooseLine({Key? key}) : super(key: key);
@@ -9,12 +10,17 @@ class ChooseLine extends StatefulWidget {
 }
 
 class _ChooseLineState extends State<ChooseLine> {
-  Widget layoutLines(List<Line> lines) {
+  Widget layoutLines(List<Line> lines, BuildContext context) {
     return Wrap(
       spacing: 6,
       children: lines.map((l) {
         return ElevatedButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+                context,
+                PageRouteBuilder(pageBuilder: (_, __, ___) => ChooseCluster(selectionnedLine: l))
+            );
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: l.bg,
             shape: RoundedRectangleBorder(
@@ -56,7 +62,7 @@ class _ChooseLineState extends State<ChooseLine> {
                             categories[index]["humanName"]!
                         ),
                       ),
-                      layoutLines(data.where((j) {return j.type == categories[index]["apiName"]!;}).toList())
+                      layoutLines(data.where((j) {return j.type == categories[index]["apiName"]!;}).toList(), context)
                     ],
                   );
                 });

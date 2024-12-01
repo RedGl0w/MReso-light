@@ -46,3 +46,78 @@ class Line {
   }
 }
 
+class Cluster {
+
+  final String id;
+  final String name;
+  final String code;
+
+  const Cluster({
+    required this.id,
+    required this.name,
+    required this.code,
+  });
+
+  factory Cluster.fromJson(Map<String, dynamic> json) {
+    return Cluster(
+      id: json['id'],
+      name: json['name'],
+      code: json['code'],
+    );
+  }
+
+  static Future<List<Cluster>> fetchClusters(String lineId) async {
+    final response = await http.get(Uri.parse('$urlBase/routers/default/index/routes/$lineId/clusters'));
+    if (response.statusCode == 200) {
+      final data = (json.decode(response.body) as List).cast<Map<String, dynamic>>();
+      return data.map(Cluster.fromJson).toList();
+    } else {
+      throw Exception('Failed to fetch Clusters');
+    }
+  }
+
+}
+
+class Times {
+
+  final DateTime timeDeparture;
+
+  const Times({
+    required this.timeDeparture,
+  });
+
+  factory Times.fromJson(Map<String, dynamic> json) {
+    int time = 0;
+    if (json["realtime"]) {
+      time = (json["realtimeDeparture"] * 1000) + (json["serviceDay"] * 1000);
+    } else {
+      time = (json["scheduledDeparture"] * 1000) + (json["serviceDay"] * 1000);
+    }
+    return Times(
+        timeDeparture: DateTime.fromMillisecondsSinceEpoch(time)
+    );
+  }
+
+  static Future<Map<String, List<Times>>> fetchTime(String lineId, String ClusterId) async {
+    final response = await http.get(
+        Uri.parse('$urlBase/routers/default/index/clusters/$ClusterId/stoptimes?route=$lineId'),
+        headers: {
+          "origin": "MReso_light"
+        }
+    );
+    if (response.statusCode == 200) {
+      Map<String, List<Times>> result = {};
+      final data = (json.decode(response.body) as List).cast<Map<String, dynamic>>();
+      data.forEach((i) {
+        result[i["pattern"]["desc"]] = [];
+        i["times"].forEach((j) {
+          result[i["pattern"]["desc"]]!.add(Times.fromJson(j));
+        });
+      });
+      return result;
+    } else {
+      throw Exception('Failed to fetch Times ${response.statusCode}');
+    }
+  }
+}
+
